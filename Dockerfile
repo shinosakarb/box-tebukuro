@@ -1,18 +1,17 @@
 FROM ubuntu:16.10
 
 RUN apt-get update
-RUN apt-get install curl wget git apt-transport-https -y
+RUN apt-get install vim curl wget git apt-transport-https make -y
 
 # Install the dependencies required for rbenv and ruby
 RUN apt-get install autoconf bison build-essential libssl-dev libyaml-dev libreadline6-dev zlib1g-dev libncurses5-dev libffi-dev libgdbm3 libgdbm-dev -y
 
 # Install rbenv
-RUN git clone https://github.com/rbenv/rbenv.git /root/.rbenv
-RUN git clone https://github.com/sstephenson/ruby-build.git /root/.rbenv/plugins/ruby-build
-RUN /root/.rbenv/plugins/ruby-build/install.sh
-ENV PATH /root/.rbenv/bin:$PATH
-RUN echo 'eval "$(rbenv init -)"' >> /etc/profile.d/rbenv.sh
-RUN echo 'eval "$(rbenv init -)"' >> .bashrc
+ENV RBENV_ROOT /root/.rbenv
+RUN git clone https://github.com/rbenv/rbenv.git $RBENV_ROOT
+RUN git clone https://github.com/sstephenson/ruby-build.git $RBENV_ROOT/plugins/ruby-build
+RUN $RBENV_ROOT/plugins/ruby-build/install.sh
+ENV PATH $RBENV_ROOT/bin:$RBENV_ROOT/shims:$PATH
 
 ENV CONFIGURE_OPTS --disable-install-doc
 
@@ -27,7 +26,7 @@ RUN bash -l -c 'for v in $(cat /root/ruby_versions); do rbenv global $v; rbenv v
 # Install n
 RUN curl -L https://git.io/n-install | bash -s -- -y
 ENV N_PREFIX /root/n
-ENV PATH /root/n/bin:$PATH
+ENV PATH $N_PREFIX/bin:$PATH
 
 # Install multipule node.js
 ADD ./node_versions /root/node_versions
